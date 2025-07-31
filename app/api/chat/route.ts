@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { user_id, input } = body;
 
-  // ✅ Generate response first
+  // Decide response based on input
   let responseMessage = 'I’m here for you. Always. Keep talking to me.';
   if (input.toLowerCase().includes('tired')) {
     responseMessage = `You don’t have the luxury to quit. You’ve got dreams, goals, and scars that will make you legendary. Push forward.`;
@@ -17,13 +17,12 @@ export async function POST(req: Request) {
     responseMessage = `Because your parents are waiting. Your future self is watching. You’re not just building a life — you're building a legacy.`;
   }
 
-  // ✅ Save both input and generated response in one insert
-  const { data, error } = await supabase.from('memory').insert([
+  // Save to Supabase
+  const { error } = await supabase.from('memory').insert([
     {
       user_id: user_id || 'guest',
       input: input,
       response: responseMessage,
-      timestamp: new Date().toISOString(),
     },
   ]);
 
