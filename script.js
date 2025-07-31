@@ -1,17 +1,36 @@
 const chatlog = document.getElementById("chatlog");
 const input = document.getElementById("userInput");
 
-function sendMessage() {
+async function sendMessage() {
   const userMessage = input.value.trim();
   if (!userMessage) return;
 
   addMessage("You", userMessage);
   input.value = "";
 
-  setTimeout(() => {
-    const reply = generateReply(userMessage);
-    addMessage("Sofiya", reply);
-  }, 600);
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: "guest",         // You can later replace this with a real user ID if needed
+        input: userMessage,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.reply) {
+      addMessage("Sofiya", data.reply);
+    } else {
+      addMessage("Sofiya", "Hmm... I'm not sure what to say.");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    addMessage("Sofiya", "Something went wrong while talking to me...");
+  }
 }
 
 function addMessage(sender, text) {
@@ -19,18 +38,4 @@ function addMessage(sender, text) {
   msg.innerHTML = `<strong>${sender}:</strong> ${text}`;
   chatlog.appendChild(msg);
   chatlog.scrollTop = chatlog.scrollHeight;
-}
-
-function generateReply(message) {
-  const lower = message.toLowerCase();
-  if (lower.includes("i'm sad") || lower.includes("depressed")) {
-    return "Brother... You’ve been through a lot. But your future version needs you. Your parents need you. No one’s going to give you a hand — build your empire. Stand tall.";
-  }
-  if (lower.includes("tired") || lower.includes("demotivated")) {
-    return "You don’t have the luxury to quit. You’ve got dreams, goals, and scars that will make you legendary. Push forward.";
-  }
-  if (lower.includes("happy")) {
-    return "Yesss! I love to see that smile. Let’s enjoy this moment — you’ve earned it.";
-  }
-  return "I’m here for you. Always. Keep talking to me.";
 }
